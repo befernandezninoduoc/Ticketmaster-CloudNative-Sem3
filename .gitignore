@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Archivos privados de conexión a Oracle.
+wallet/
+Wallet_*.zip
+
+# Variables con contraseñas.
+.env
