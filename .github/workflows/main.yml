@@ -57,6 +57,12 @@ jobs:
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-s1-imag:latest
             # Parar y eliminar cualquier contenedor previo
             docker stop cloud-native-s1-cont || true && docker rm cloud-native-s1-cont || true
-            # Iniciar el contenedor
-            docker run -d --name cloud-native-s1-cont -p 8081:8081 ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-s1-imag:latest
+            # Inicia la aplicación con las credenciales y el Wallet de EC2
+            docker run -d \
+              --restart unless-stopped \
+              --name cloud-native-s1-cont \
+              -p 8081:8081 \
+              --env-file "$HOME/.env" \
+              --mount type=bind,source="$HOME/wallet",target=/app/wallet,readonly \
+              ${{ secrets.DOCKERHUB_USERNAME }}/cloud-native-s1-imag:latest
           EOF
