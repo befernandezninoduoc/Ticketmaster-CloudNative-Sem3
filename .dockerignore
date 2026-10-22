@@ -1,0 +1,20 @@
+# Excluye el historial de Git.
+.git
+
+# Excluye compilaciones locales.
+target
+
+# Excluye el Wallet y sus archivos comprimidos.
+wallet
+Wallet_*.zip
+
+# Excluye archivos con variables privadas.
+.env
+.env.*
+
+# Excluye configuraciones del editor.
+.idea
+.vscode
+
+# Excluye registros de ejecución.
+*.log
