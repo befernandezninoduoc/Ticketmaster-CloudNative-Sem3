@@ -35,6 +35,12 @@ public class Evento {
         this.precioEntrada = precioEntrada;
     }
 
+    public void actualizar(String nombre, LocalDateTime fecha, BigDecimal precioEntrada) {
+        this.nombre = nombre;
+        this.fecha = fecha;
+        this.precioEntrada = precioEntrada;
+    }
+
     public Long getId() {
         return id;
     }

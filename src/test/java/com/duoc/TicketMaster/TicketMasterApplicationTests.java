@@ -1,7 +1,9 @@
 package com.duoc.TicketMaster;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +26,45 @@ class TicketMasterApplicationTests {
 
 	@Autowired
 	private CompraRepository compraRepository;
+
+	@Test
+	void permiteActualizarYEliminarEventoPorId() throws Exception {
+		MvcResult respuestaEvento = solicitudes.perform(post("/api/eventos")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+									"nombre": "Evento original",
+									"fecha": "2026-12-15T20:00:00",
+									"precioEntrada": 15000.00
+								}
+								"""))
+				.andExpect(status().isCreated())
+				.andReturn();
+
+		Number eventoId = JsonPath.read(
+				respuestaEvento.getResponse().getContentAsString(), "$.id");
+		String rutaEvento = "/api/eventos/" + eventoId.longValue();
+
+		solicitudes.perform(put(rutaEvento)
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+									"nombre": "Evento actualizado",
+									"fecha": "2026-12-16T21:00:00",
+									"precioEntrada": 20000.00
+								}
+								"""))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(eventoId.intValue()))
+				.andExpect(jsonPath("$.nombre").value("Evento actualizado"))
+				.andExpect(jsonPath("$.precioEntrada").value(20000.00));
+
+		solicitudes.perform(delete(rutaEvento))
+				.andExpect(status().isNoContent());
+
+		solicitudes.perform(delete(rutaEvento))
+				.andExpect(status().isNotFound());
+	}
 
 	@Test
 	void permiteCrearListarEventosYComprarEntradas() throws Exception {
