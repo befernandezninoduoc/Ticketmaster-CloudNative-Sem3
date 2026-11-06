@@ -6,6 +6,11 @@ COPY src ./src
 RUN mvn clean package
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-COPY --from=buildstage /app/target/TicketMaster-0.0.1-SNAPSHOT.jar ./app.jar
-EXPOSE 8081
-CMD ["java", "-jar", "/app/app.jar"]
+# Copiar el jar generado por Maven
+COPY target/TicketMaster-0.0.1-SNAPSHOT.jar app.jar
+
+# Exponer el puerto de la aplicación
+EXPOSE 8080
+
+# Comando para ejecutar la aplicación
+ENTRYPOINT ["java", "-jar", "app.jar"]
