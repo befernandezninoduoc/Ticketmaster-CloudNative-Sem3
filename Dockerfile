@@ -1,13 +1,10 @@
-FROM maven:3.9-eclipse-temurin-21 AS buildstage
-WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+# Usar una imagen base de Java 21 (igual a la de tu proyecto)
+FROM eclipse-temurin:21-jdk-alpine
 
-RUN mvn clean package
-FROM eclipse-temurin:21-jre
 WORKDIR /app
-# Copiar el jar generado por Maven
-COPY target/TicketMaster-0.0.1-SNAPSHOT.jar app.jar
+
+# Copiar cualquier jar generado en target/ sin importar el nombre exacto
+COPY target/*.jar app.jar
 
 # Exponer el puerto de la aplicación
 EXPOSE 8080
