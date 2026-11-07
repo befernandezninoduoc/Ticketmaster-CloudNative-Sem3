@@ -60,11 +60,14 @@ jobs:
             # Parar y eliminar contenedor previo
             docker stop ms-ticketmaster || true && docker rm ms-ticketmaster || true
             
-            # Iniciar el contenedor mapeando el puerto 8080, credenciales de AWS y volumen EFS
+            # Iniciar el contenedor mapeando el puerto, EFS y las credenciales de Oracle/AWS
             docker run -d \
               --restart unless-stopped \
               --name ms-ticketmaster \
-              -p 8080:8080 \
+              -p 8081:8081 \
+              -e ORACLE_DB_URL="jdbc:oracle:thin:@ticketmaster_high?TNS_ADMIN=/app/efs/Wallet_MIBDBENJAMINFNM" \
+              -e ORACLE_DB_USERNAME="ticketmaster_user" \
+              -e ORACLE_DB_PASSWORD="TuPasswordSeguro123_#" \
               -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
               -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
               -e AWS_SESSION_TOKEN=${{ secrets.AWS_SESSION_TOKEN }} \
