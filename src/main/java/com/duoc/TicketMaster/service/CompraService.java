@@ -39,18 +39,31 @@ public class CompraService {
                         HttpStatus.NOT_FOUND, "Evento no encontrado"));
 
         BigDecimal precioUnitario = evento.getPrecioEntrada();
-        BigDecimal precioTotal = precioUnitario.multiply(BigDecimal.valueOf(solicitud.cantidad()));
+        // CORREGIDO: Usando cantidadEntradas() en lugar de cantidad()
+        BigDecimal precioTotal = precioUnitario.multiply(BigDecimal.valueOf(solicitud.cantidadEntradas()));
 
         // Crear y guardar la compra
-        Compra nuevaCompra = new Compra(evento, solicitud.cantidad(), precioUnitario, precioTotal);
+        Compra nuevaCompra = new Compra(evento, solicitud.cantidadEntradas(), precioUnitario, precioTotal);
+
+        // Integrar los campos opcionales si vienen informados en la solicitud
+        if (solicitud.usuarioEmail() != null && !solicitud.usuarioEmail().isBlank()) {
+            nuevaCompra.setUsuarioEmail(solicitud.usuarioEmail());
+        }
+        if (solicitud.artista() != null && !solicitud.artista().isBlank()) {
+            nuevaCompra.setArtista(solicitud.artista());
+        }
+        if (solicitud.ubicacion() != null && !solicitud.ubicacion().isBlank()) {
+            nuevaCompra.setUbicacion(solicitud.ubicacion());
+        }
+
         Compra compraGuardada = compraRepository.save(nuevaCompra);
 
-        // Generar PDF en EFS y subir automáticamente a S3 bajo la estructura /eventoID/usuarioX/ticketID.pdf
+        // Generar PDF en EFS y subir automáticamente a S3
         try {
             byte[] pdfBytes = pdfService.generarPdfTicket(
                     evento.getNombre(),
                     compraGuardada.getArtista(),
-                    compraGuardada.getUbicacion(),
+                    compurGuardadaSegura(compraGuardada), // o compraGuardada.getUbicacion()
                     precioTotal.doubleValue(),
                     compraGuardada.getUsuarioEmail(),
                     compraGuardada.getId()
@@ -68,8 +81,12 @@ public class CompraService {
 
         return new CompraRespuesta(
                 evento.getNombre(),
-                solicitud.cantidad(),
+                solicitud.cantidadEntradas(),
                 precioUnitario,
                 precioTotal);
+    }
+
+    private String compurGuardadaSegura(Compra compra) {
+        return compra.getUbicacion();
     }
 }

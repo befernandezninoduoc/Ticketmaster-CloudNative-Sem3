@@ -5,5 +5,8 @@ import jakarta.validation.constraints.Positive;
 
 public record CompraSolicitud(
         @NotNull @Positive Long eventoId,
-        @Positive int cantidad) {
+        @NotNull @Positive Integer cantidadEntradas,
+        String usuarioEmail,
+        String artista,
+        String ubicacion) {
 }

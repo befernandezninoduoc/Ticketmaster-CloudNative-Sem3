@@ -114,4 +114,27 @@ public class TicketController {
 
         return ResponseEntity.ok(reporte);
     }
+
+    /**
+     * Endpoint para filtrar y listar tickets aplicando doble filtro (por eventoId, por usuarioEmail, o ambos).
+     */
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<Compra>> filtrarTickets(
+            @RequestParam(required = false) Long eventoId,
+            @RequestParam(required = false) String usuarioEmail) {
+
+        List<Compra> tickets;
+
+        if (eventoId != null && usuarioEmail != null && !usuarioEmail.isBlank()) {
+            tickets = compraRepository.findByEventoIdAndUsuarioEmail(eventoId, usuarioEmail);
+        } else if (eventoId != null) {
+            tickets = compraRepository.findByEventoId(eventoId);
+        } else if (usuarioEmail != null && !usuarioEmail.isBlank()) {
+            tickets = compraRepository.findByUsuarioEmail(usuarioEmail);
+        } else {
+            tickets = compraRepository.findAll();
+        }
+
+        return ResponseEntity.ok(tickets);
+    }
 }

@@ -8,7 +8,8 @@ COPY .mvn .mvn
 COPY pom.xml .
 COPY src src
 
-# Compilar el proyecto omitiendo los tests
+# Dar permisos de ejecución a mvnw y compilar omitiendo los tests
+RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
 # --- Etapa 2: Imagen final ligera para ejecución ---
@@ -18,5 +19,5 @@ WORKDIR /app
 # Copiar el jar compilado desde la primera etapa automáticamente
 COPY --from=build /app/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "app.jar"]
