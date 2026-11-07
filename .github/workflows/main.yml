@@ -65,7 +65,7 @@ jobs:
               --restart unless-stopped \
               --name ms-ticketmaster \
               -p 8081:8081 \
-              -e ORACLE_DB_URL="jdbc:oracle:thin:@ticketmaster_high?TNS_ADMIN=/app/efs/Wallet_MIBDBENJAMINFNM" \
+              -e ORACLE_DB_URL="jdbc:oracle:thin:@mibdbenjaminfnm_high?TNS_ADMIN=/app/efs/Wallet_MIBDBENJAMINFNM" \
               -e ORACLE_DB_USERNAME="ticketmaster_user" \
               -e ORACLE_DB_PASSWORD="TuPasswordSeguro123_#" \
               -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
