@@ -7,11 +7,14 @@ import com.duoc.TicketMaster.model.EstadisticaRespuesta;
 import com.duoc.TicketMaster.repository.CompraRepository;
 import com.duoc.TicketMaster.service.CompraService;
 import com.duoc.TicketMaster.service.S3Service;
+import com.duoc.TicketMaster.service.TicketPdfService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -27,11 +30,18 @@ public class TicketController {
 
     private final CompraService compraService;
     private final S3Service s3Service;
+    private final TicketPdfService pdfService;
     private final CompraRepository compraRepository;
 
-    public TicketController(CompraService compraService, S3Service s3Service, CompraRepository compraRepository) {
+    public TicketController(
+            CompraService compraService,
+            S3Service s3Service,
+            TicketPdfService pdfService,
+            CompraRepository compraRepository) {
+
         this.compraService = compraService;
         this.s3Service = s3Service;
+        this.pdfService = pdfService;
         this.compraRepository = compraRepository;
     }
 
@@ -45,9 +55,8 @@ public class TicketController {
         return ResponseEntity.ok(respuesta);
     }
 
-    /**
-     * Endpoint para descargar el archivo PDF del ticket desde S3 utilizando los filtros correspondientes.
-     */
+    //Endpoint para descargar el archivo PDF del ticket desde S3
+
     @GetMapping("/{eventoId}/{usuarioEmail}/{ticketId}/descargar")
     public ResponseEntity<InputStreamResource> descargarTicket(
             @PathVariable String eventoId,
@@ -63,19 +72,52 @@ public class TicketController {
                 .body(resource);
     }
 
-    /**
-     * Endpoint para modificar los detalles (como artista o ubicación) de un ticket existente.
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<String> modificarTicket(@PathVariable Long id, @RequestBody Compra nuevosDetalles) {
-        Compra compra = compraRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ticket no encontrado"));
+    // Endpoint para modificar los detalles (como artista o ubicación) de un ticket existente
 
-        compra.setArtista(nuevosDetalles.getArtista());
-        compra.setUbicacion(nuevosDetalles.getUbicacion());
+    @PutMapping("/{id}")
+    public ResponseEntity<String> modificarTicket(
+            @PathVariable Long id,
+            @RequestBody Compra nuevosDetalles) {
+
+        Compra compra = compraRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Ticket no encontrado"));
+
+        String artista = nuevosDetalles.getArtista();
+        String ubicacion = nuevosDetalles.getUbicacion();
+
+        if (artista == null || artista.isBlank()
+                || ubicacion == null || ubicacion.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Debes indicar artista y ubicacion");
+        }
+
+        // Generar el PDF actualizado
+        byte[] pdfBytes = pdfService.generarPdfTicket(
+                compra.getEvento().getNombre(),
+                artista,
+                ubicacion,
+                compra.getPrecioTotal().doubleValue(),
+                compra.getUsuarioEmail(),
+                compra.getId()
+        );
+
+        // Reemplazar el PDF existente en S3
+        s3Service.subirTicketS3(
+                String.valueOf(compra.getEvento().getId()),
+                compra.getUsuarioEmail(),
+                compra.getId(),
+                pdfBytes
+        );
+
+        // Actualizar los datos de Oracle
+        compra.setArtista(artista);
+        compra.setUbicacion(ubicacion);
         compraRepository.save(compra);
 
-        return ResponseEntity.ok("Detalles del ticket " + id + " actualizados con éxito.");
+        return ResponseEntity.ok(
+                "Ticket " + id + " actualizado en Oracle y S3.");
     }
 
     /**
