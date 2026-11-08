@@ -3,6 +3,7 @@ package com.duoc.TicketMaster.controller;
 import com.duoc.TicketMaster.model.Compra;
 import com.duoc.TicketMaster.model.Evento;
 import com.duoc.TicketMaster.model.NuevoEventoSolicitud;
+import com.duoc.TicketMaster.model.TicketRespuestaDto;
 import com.duoc.TicketMaster.repository.CompraRepository;
 import com.duoc.TicketMaster.service.EventoService;
 import jakarta.validation.Valid;
@@ -55,10 +56,26 @@ public class EventoController {
     }
 
     /**
-     * Endpoint para obtener todos los tickets/compras asociados a un evento específico.
+     * Obtiene el listado optimizado de los tickets asociados a un evento específico,
+     * transformando las entidades de base de datos a un DTO para entregar un JSON limpio y ligero.
+     *
+     * @param eventoId Identificador único del evento consultado.
+     * @return Lista de {@link TicketRespuestaDto} con el detalle de cada compra realizada.
      */
     @GetMapping("/{eventoId}/tickets")
-    public List<Compra> obtenerTicketsPorEvento(@PathVariable Long eventoId) {
-        return compraRepository.findByEventoId(eventoId);
+    public List<TicketRespuestaDto> obtenerTicketsPorEvento(@PathVariable Long eventoId) {
+        List<Compra> compras = compraRepository.findByEventoId(eventoId);
+
+        return compras.stream()
+                .map(c -> new TicketRespuestaDto(
+                        c.getId(),
+                        c.getUsuarioEmail(),
+                        c.getCantidadEntradas(),
+                        c.getPrecioUnitario(),
+                        c.getPrecioTotal(),
+                        c.getArtista(),
+                        c.getUbicacion()
+                ))
+                .toList();
     }
 }
