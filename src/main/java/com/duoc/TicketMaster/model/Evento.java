@@ -10,20 +10,21 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "eventos")
+@Table(name = "EVENTOS")
 public class Evento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "NOMBRE", nullable = false, length = 150)
     private String nombre;
 
-    @Column(nullable = false)
+    @Column(name = "FECHA", nullable = false)
     private LocalDateTime fecha;
 
-    @Column(name = "precio_entrada", nullable = false, precision = 10, scale = 2)
+    @Column(name = "PRECIO_ENTRADA", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioEntrada;
 
     protected Evento() {
