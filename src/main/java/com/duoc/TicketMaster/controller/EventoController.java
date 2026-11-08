@@ -1,7 +1,9 @@
 package com.duoc.TicketMaster.controller;
 
+import com.duoc.TicketMaster.model.Compra;
 import com.duoc.TicketMaster.model.Evento;
 import com.duoc.TicketMaster.model.NuevoEventoSolicitud;
+import com.duoc.TicketMaster.repository.CompraRepository;
 import com.duoc.TicketMaster.service.EventoService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -21,9 +23,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class EventoController {
 
     private final EventoService eventoService;
+    private final CompraRepository compraRepository;
 
-    public EventoController(EventoService eventoService) {
+    public EventoController(EventoService eventoService, CompraRepository compraRepository) {
         this.eventoService = eventoService;
+        this.compraRepository = compraRepository;
     }
 
     @GetMapping
@@ -48,5 +52,13 @@ public class EventoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void eliminarEvento(@PathVariable Long id) {
         eventoService.eliminarEvento(id);
+    }
+
+    /**
+     * Endpoint para obtener todos los tickets/compras asociados a un evento específico.
+     */
+    @GetMapping("/{eventoId}/tickets")
+    public List<Compra> obtenerTicketsPorEvento(@PathVariable Long eventoId) {
+        return compraRepository.findByEventoId(eventoId);
     }
 }
