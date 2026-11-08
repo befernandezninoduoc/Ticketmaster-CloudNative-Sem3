@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      # Paso 1: actualizar el lab del AWS
       # Paso 1: Checkout del repositorio
       - name: Checkout repository
         uses: actions/checkout@v3
