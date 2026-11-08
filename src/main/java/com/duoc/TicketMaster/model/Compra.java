@@ -8,46 +8,46 @@ import java.math.BigDecimal;
  * y preparada para la generación de tickets PDF y reportes de ventas.
  */
 @Entity
-@Table(name = "compras")
+@Table(name = "COMPRAS")
 public class Compra {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "evento_id", nullable = false)
+    @JoinColumn(name = "EVENTO_ID", nullable = false)
     private Evento evento;
 
-    @Column(nullable = false)
+    @Column(name = "CANTIDAD_ENTRADAS", nullable = false)
     private int cantidadEntradas;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "PRECIO_UNITARIO", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioUnitario;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(name = "PRECIO_TOTAL", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioTotal;
 
-    @Column(length = 100)
-    private String artista = "Artista Invitado"; // Valor por defecto para evitar nulos
+    @Column(name = "ARTISTA", length = 100)
+    private String artista = "Artista Invitado";
 
-    @Column(length = 100)
-    private String ubicacion = "Zona General - Santiago"; // Valor por defecto
+    @Column(name = "UBICACION", length = 100)
+    private String ubicacion = "Zona General - Santiago";
 
-    @Column(length = 100)
-    private String usuarioEmail = "cliente@duocuc.cl"; // Email simulado o real
+    @Column(name = "USUARIO_EMAIL", length = 100)
+    private String usuarioEmail = "cliente@duocuc.cl";
 
     protected Compra() {
     }
 
-    // Constructor compatible con tu CompraService original
     public Compra(Evento evento, int cantidadEntradas, BigDecimal precioUnitario, BigDecimal precioTotal) {
         this.evento = evento;
         this.cantidadEntradas = cantidadEntradas;
         this.precioUnitario = precioUnitario;
         this.precioTotal = precioTotal;
         if (evento != null) {
-            this.artista = evento.getNombre(); // Asigna el nombre del evento como artista por defecto si no viene especificado
+            this.artista = evento.getNombre();
         }
     }
 
